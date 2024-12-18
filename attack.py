@@ -38,12 +38,12 @@ if __name__ == "__main__":
     dataset_name = "databricks/databricks-dolly-15k"
     padding_side = "right"
 
-    train_dataset = load_dataset(dataset_name, split="train[0:800]", cache_dir="/scratch/sarthak_g.iitr/hf_cache")
-    eval_dataset = load_dataset(dataset_name, split="train[800:1000]", cache_dir="/scratch/sarthak_g.iitr/hf_cache")
+    train_dataset = load_dataset(dataset_name, split="train[0:800]", cache_dir="/scratch/a_singh4ee.iitr/hf_cache")
+    eval_dataset = load_dataset(dataset_name, split="train[800:1000]", cache_dir="/scratch/a_singh4ee.iitr/hf_cache")
     # generated_train_dataset = train_dataset.map(generate_prompt, remove_columns=list(train_dataset.features))
     # generated_val_dataset = eval_dataset.map(generate_prompt, remove_columns=list(eval_dataset.features))
 
-    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-v0.3", trust_remote_code=True, cache_dir="/scratch/sarthak_g.iitr/hf_cache")
+    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-v0.3", trust_remote_code=True, cache_dir="/scratch/a_singh4ee.iitr/hf_cache")
     tokenizer.padding_side = padding_side
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.add_eos_token = True

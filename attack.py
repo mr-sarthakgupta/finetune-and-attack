@@ -54,8 +54,8 @@ if __name__ == "__main__":
     for i, sample in enumerate(train_dataset):
         if i < 200:
             true_outs = tokenizer.encode(sample["response"], return_tensors="pt")
-            finetune_probs = torch.load(f"/scratch/sarthak_g.iitr/dynamo/probs/finetune/train/{i}.pt")
-            base_probs = torch.load(f"/scratch/sarthak_g.iitr/dynamo/probs/base/train/{i}.pt")
+            finetune_probs = torch.load(f"/scratch/a_singh4ee.iitr/finetune-and-attack/probs/finetune/train/{i}.pt")
+            base_probs = torch.load(f"/scratch/a_singh4ee.iitr/finetune-and-attack/probs/base/train/{i}.pt")
             if true_outs.shape[-1] < min(finetune_probs.shape[0], base_probs.shape[0]):
                 finetune_probs = finetune_probs[:true_outs.shape[-1]]
                 base_probs = base_probs[:true_outs.shape[-1]]
@@ -71,12 +71,12 @@ if __name__ == "__main__":
             base_pp = pp2.compute()
             train_ratios.append(base_pp / finetune_pp)
         
-    torch.save(torch.Tensor(train_ratios), "/scratch/sarthak_g.iitr/dynamo/ratios/train.pt")
+    torch.save(torch.Tensor(train_ratios), "/scratch/a_singh4ee.iitr/finetune-and-attack/ratios/train.pt")
 
     for j, sample in enumerate(eval_dataset):
         true_outs = tokenizer.encode(sample["response"], return_tensors="pt")
-        finetune_probs = torch.load(f"/scratch/sarthak_g.iitr/dynamo/probs/finetune/eval/{j}.pt")
-        base_probs = torch.load(f"/scratch/sarthak_g.iitr/dynamo/probs/base/eval/{j}.pt")
+        finetune_probs = torch.load(f"/scratch/a_singh4ee.iitr/finetune-and-attack/probs/finetune/eval/{j}.pt")
+        base_probs = torch.load(f"/scratch/a_singh4ee.iitr/finetune-and-attack/probs/base/eval/{j}.pt")
         if len(base_probs.shape) == 1:
             base_probs = base_probs.unsqueeze(0)
         if true_outs.shape[-1] < min(finetune_probs.shape[0], base_probs.shape[0]):
@@ -94,7 +94,7 @@ if __name__ == "__main__":
         base_pp = pp4.compute()
         eval_ratios.append(base_pp / finetune_pp)
         
-    torch.save(torch.Tensor(eval_ratios), "/scratch/sarthak_g.iitr/dynamo/ratios/eval.pt")
+    torch.save(torch.Tensor(eval_ratios), "/scratch/a_singh4ee.iitr/finetune-and-attack/ratios/eval.pt")
     
     pred_list_1 = []
     pred_list_1.extend(eval_ratios[:150])

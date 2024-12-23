@@ -43,19 +43,6 @@ if __name__ == "__main__":
     
     torch.cuda.empty_cache()
 
-    # for j, datum in enumerate(eval_dataset):
-    #     print(f"eval {j}")
-    #     if len(datum['text']) > 0:
-    #         input_tokens = tokenizer(generate_prompt(datum), return_tensors="pt")
-    #         output_dict = mistral_dolly.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
-    #         probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
-    #     else:
-    #         input_tokens = tokenizer(generate_prompt(datum), return_tensors="pt")
-    #         output_dict = mistral_dolly.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
-    #         probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
-    #     torch.save(probs.cpu(), f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/finetune/quantized/eval/{j}.pt")
-    #     del probs, output_dict, input_tokens
-    #     torch.cuda.empty_cache()
 
     del mistral_dolly # remove fine-tuned model to make space in vRAM
     torch.cuda.empty_cache()
@@ -81,22 +68,8 @@ if __name__ == "__main__":
             torch.cuda.empty_cache()
     
 
-    # for j, datum in enumerate(eval_dataset):
-    #     print(f"eval {j}")
-    #     if len(datum['text']) > 0:
-    #         input_tokens = tokenizer(generate_prompt(datum), return_tensors="pt")
-    #         output_dict = mistral_dolly_unquantized.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
-    #         probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
-    #     else:
-    #         input_tokens = tokenizer(generate_prompt(datum), return_tensors="pt")
-    #         output_dict = mistral_dolly_unquantized.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
-    #         probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
-    #     torch.save(probs.cpu(), f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/finetune/fullbits/eval/{j}.pt")
-    #     del probs, output_dict, input_tokens
-    #     torch.cuda.empty_cache()
-    
-
     del mistral_dolly_unquantized # remove fine-tuned model to make space in vRAM
+    torch.cuda.empty_cache()
 
     base_mistral = AutoModelForCausalLM.from_pretrained(
         "meta-llama/Llama-3.2-3B-Instruct",
@@ -118,24 +91,9 @@ if __name__ == "__main__":
             torch.save(probs.cpu(), f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/base/quantized/train/{k}.pt")
             del probs, output_dict, input_tokens
             torch.cuda.empty_cache()
-    
-
-    # for l, datum in enumerate(eval_dataset):
-    #     print(f"finetune/eval/{l}")
-    #     if len(datum['text']) > 0:
-    #         input_tokens = tokenizer(generate_prompt(datum), return_tensors="pt")
-    #         output_dict = base_mistral.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
-    #         probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
-    #     else:
-    #         input_tokens = tokenizer(generate_prompt(datum), return_tensors="pt")
-    #         output_dict = base_mistral.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
-    #         probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
-    #     torch.save(probs.cpu(), f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/base/quantized/eval/{l}.pt")
-    #     del probs, output_dict, input_tokens
-    #     torch.cuda.empty_cache()
-    
-
-
+     
+    del base_mistral 
+    torch.cuda.empty_cache()
 
     base_mistral_unquantized = AutoModelForCausalLM.from_pretrained(
         "meta-llama/Llama-3.2-3B-Instruct",
@@ -157,18 +115,3 @@ if __name__ == "__main__":
             torch.save(probs.cpu(), f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/base/fullbits/train/{k}.pt")
             del probs, output_dict, input_tokens
             torch.cuda.empty_cache()
-    
-
-    # for l, datum in enumerate(eval_dataset):
-    #     print(f"finetune/eval/{l}")
-    #     if len(datum['text']) > 0:
-    #         input_tokens = tokenizer(generate_prompt(datum), return_tensors="pt")
-    #         output_dict = base_mistral_unquantized.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=50, return_dict_in_generate=True)
-    #         probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
-    #     else:
-    #         input_tokens = tokenizer(generate_prompt(datum), return_tensors="pt")
-    #         output_dict = base_mistral_unquantized.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=50, return_dict_in_generate=True)
-    #         probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
-    #     torch.save(probs.cpu(), f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/base/fullbits/eval/{l}.pt")
-    #     del probs, output_dict, input_tokens
-    #     torch.cuda.empty_cache()

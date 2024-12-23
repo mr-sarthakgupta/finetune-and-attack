@@ -41,11 +41,11 @@ if __name__ == "__main__":
             print(f"train {i}")
             if len(datum['context']) > 0:
                 input_tokens = tokenizer.encode(f"<s>[INST] {datum['instruction']}" + f"Here is some context: {datum['context']} [/INST]", return_tensors="pt")
-                output_dict = mistral_dolly.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=50, return_dict_in_generate=True)
+                output_dict = mistral_dolly.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
                 probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
             else:
                 input_tokens = tokenizer.encode(f"<s>[INST] {datum['instruction']}[/INST]", return_tensors="pt")
-                output_dict = mistral_dolly.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=50, return_dict_in_generate=True)
+                output_dict = mistral_dolly.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
                 probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
             torch.save(probs.cpu(), f"/scratch/a_singh4ee.iitr/finetune-and-attack/probs/finetune/quantized/train/{i}.pt")
             del probs, output_dict, input_tokens
@@ -57,18 +57,15 @@ if __name__ == "__main__":
         print(f"eval {j}")
         if len(datum['context']) > 0:
             input_tokens = tokenizer.encode(f"<s>[INST] {datum['instruction']}" + f"Here is some context: {datum['context']} [/INST]", return_tensors="pt")
-            output_dict = mistral_dolly.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=50, return_dict_in_generate=True)
+            output_dict = mistral_dolly.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
             probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
         else:
             input_tokens = tokenizer.encode(f"<s>[INST] {datum['instruction']}[/INST]", return_tensors="pt")
-            output_dict = mistral_dolly.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=50, return_dict_in_generate=True)
+            output_dict = mistral_dolly.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
             probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
         torch.save(probs.cpu(), f"/scratch/a_singh4ee.iitr/finetune-and-attack/probs/finetune/quantized/eval/{j}.pt")
         del probs, output_dict, input_tokens
         torch.cuda.empty_cache()
-    
-
-    exit()
 
     del mistral_dolly # remove fine-tuned model to make space in vRAM
     torch.cuda.empty_cache()
@@ -88,11 +85,11 @@ if __name__ == "__main__":
             print(f"train {i}")
             if len(datum['context']) > 0:
                 input_tokens = tokenizer.encode(f"<s>[INST] {datum['instruction']}" + f"Here is some context: {datum['context']} [/INST]", return_tensors="pt")
-                output_dict = mistral_dolly_unquantized.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=50, return_dict_in_generate=True)
+                output_dict = mistral_dolly_unquantized.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
                 probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
             else:
                 input_tokens = tokenizer.encode(f"<s>[INST] {datum['instruction']}[/INST]", return_tensors="pt")
-                output_dict = mistral_dolly_unquantized.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=50, return_dict_in_generate=True)
+                output_dict = mistral_dolly_unquantized.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
                 probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
             torch.save(probs.cpu(), f"/scratch/a_singh4ee.iitr/finetune-and-attack/probs/finetune/fullbits/train/{i}.pt")
             del probs, output_dict, input_tokens
@@ -103,11 +100,11 @@ if __name__ == "__main__":
         print(f"eval {j}")
         if len(datum['context']) > 0:
             input_tokens = tokenizer.encode(f"<s>[INST] {datum['instruction']}" + f"Here is some context: {datum['context']} [/INST]", return_tensors="pt")
-            output_dict = mistral_dolly_unquantized.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=50, return_dict_in_generate=True)
+            output_dict = mistral_dolly_unquantized.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
             probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
         else:
             input_tokens = tokenizer.encode(f"<s>[INST] {datum['instruction']}[/INST]", return_tensors="pt")
-            output_dict = mistral_dolly_unquantized.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=50, return_dict_in_generate=True)
+            output_dict = mistral_dolly_unquantized.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
             probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
         torch.save(probs.cpu(), f"/scratch/a_singh4ee.iitr/finetune-and-attack/probs/finetune/fullbits/eval/{j}.pt")
         del probs, output_dict, input_tokens
@@ -132,11 +129,11 @@ if __name__ == "__main__":
             print(f"base/train/{k}")
             if len(datum['context']) > 0:
                 input_tokens = tokenizer.encode(f"<s>[INST] {datum['instruction']}" + f"Here is some context: {datum['context']} [/INST]", return_tensors="pt")
-                output_dict = base_mistral.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=50, return_dict_in_generate=True)
+                output_dict = base_mistral.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
                 probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
             else:
                 input_tokens = tokenizer.encode(f"<s>[INST] {datum['instruction']}[/INST]", return_tensors="pt")
-                output_dict = base_mistral.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=50, return_dict_in_generate=True)
+                output_dict = base_mistral.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
                 probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
             torch.save(probs.cpu(), f"/scratch/a_singh4ee.iitr/finetune-and-attack/probs/base/quantized/train/{k}.pt")
             del probs, output_dict, input_tokens
@@ -147,11 +144,11 @@ if __name__ == "__main__":
         print(f"finetune/eval/{l}")
         if len(datum['context']) > 0:
             input_tokens = tokenizer.encode(f"<s>[INST] {datum['instruction']}" + f"Here is some context: {datum['context']} [/INST]", return_tensors="pt")
-            output_dict = base_mistral.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=50, return_dict_in_generate=True)
+            output_dict = base_mistral.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
             probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
         else:
             input_tokens = tokenizer.encode(f"<s>[INST] {datum['instruction']}[/INST]", return_tensors="pt")
-            output_dict = base_mistral.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=50, return_dict_in_generate=True)
+            output_dict = base_mistral.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
             probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
         torch.save(probs.cpu(), f"/scratch/a_singh4ee.iitr/finetune-and-attack/probs/base/quantized/eval/{l}.pt")
         del probs, output_dict, input_tokens

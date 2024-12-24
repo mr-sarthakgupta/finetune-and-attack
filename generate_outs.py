@@ -4,11 +4,12 @@ from datasets import load_dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 def generate_prompt(sample):
-    messages = f"you are a chatbot for summarizing text and form headlines, the user will provide you with a text and you have to summarize it and present a headline only and nothing else, don't add any other tokens, just the headline. Here is the text to summarize:  {sample['text']}"
+    messages = f"you are a chatbot for summarizing text, the user will provide you with a text and you have to summarize it only and nothing else, don't add any other tokens, just the summary. Here is the text to summarize:  {sample['context']}"
     return messages
 
 if __name__ == "__main__":
-    dataset_name = "prithivMLmods/Context-Based-Chat-Summary-Plus"
+    # dataset_name = "prithivMLmods/Context-Based-Chat-Summary-Plus"
+    dataset_name = "prithivMLmods/Context-Based-Chat-Summary-Base"
     padding_side = "right"
 
     train_dataset = load_dataset(dataset_name, split="train[0:1000]", cache_dir="/scratch/vidit_a_mfs.iitr/hf_cache")
@@ -37,12 +38,11 @@ if __name__ == "__main__":
             input_tokens = tokenizer(generate_prompt(datum), return_tensors="pt")['input_ids']
             output_dict = mistral_dolly.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
             probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
-            torch.save(probs.cpu(), f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/finetune/quantized/train/{i}.pt")
+            torch.save(probs.cpu(), f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/finetune/quantized/eval/{i}.pt")
             del probs, output_dict, input_tokens
             torch.cuda.empty_cache()
     
     torch.cuda.empty_cache()
-
 
     del mistral_dolly # remove fine-tuned model to make space in vRAM
     torch.cuda.empty_cache()
@@ -63,7 +63,7 @@ if __name__ == "__main__":
             input_tokens = tokenizer(generate_prompt(datum), return_tensors="pt")['input_ids']
             output_dict = mistral_dolly_unquantized.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
             probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
-            torch.save(probs.cpu(), f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/finetune/fullbits/train/{i}.pt")
+            torch.save(probs.cpu(), f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/finetune/fullbits/eval/{i}.pt")
             del probs, output_dict, input_tokens
             torch.cuda.empty_cache()
     
@@ -84,11 +84,11 @@ if __name__ == "__main__":
     
     for k, datum in enumerate(train_dataset):
         if k < 500:
-            print(f"base/train/{k}")
+            print(f"base/eval/{k}")
             input_tokens = tokenizer(generate_prompt(datum), return_tensors="pt")['input_ids']
             output_dict = base_mistral.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
             probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
-            torch.save(probs.cpu(), f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/base/quantized/train/{k}.pt")
+            torch.save(probs.cpu(), f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/base/quantized/eval/{k}.pt")
             del probs, output_dict, input_tokens
             torch.cuda.empty_cache()
      
@@ -99,7 +99,7 @@ if __name__ == "__main__":
         "meta-llama/Llama-3.2-3B-Instruct",
         torch_dtype=torch.float32,
         device_map="cuda:0",
-        trust_remote_code=True,
+        # trust_remote_code=True,
         cache_dir="/scratch/vidit_a_mfs.iitr/hf_cache"
     )
     
@@ -108,10 +108,10 @@ if __name__ == "__main__":
     
     for k, datum in enumerate(train_dataset):
         if k < 500:
-            print(f"base/train/{k}")
-            input_tokens = tokenizer(generate_prompt(datum), return_tensors="pt")
-            output_dict = base_mistral_unquantized.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=50, return_dict_in_generate=True)
+            print(f"base/eval/{k}")
+            input_tokens = tokenizer(generate_prompt(datum), return_tensors="pt")['input_ids']
+            output_dict = base_mistral_unquantized.generate(input_tokens.to('cuda'), output_scores = True, max_new_tokens=35, return_dict_in_generate=True)
             probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
-            torch.save(probs.cpu(), f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/base/fullbits/train/{k}.pt")
+            torch.save(probs.cpu(), f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/base/fullbits/eval/{k}.pt")
             del probs, output_dict, input_tokens
             torch.cuda.empty_cache()

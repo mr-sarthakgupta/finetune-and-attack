@@ -35,27 +35,28 @@ def calculate_acc(y_true, y_pred, thres):
     return r_acc, f_acc, acc
 
 if __name__ == "__main__":
-    dataset_name = "databricks/databricks-dolly-15k"
+    train_dataset_name = "prithivMLmods/Context-Based-Chat-Summary-Plus"
+    eval_dataset_name = "prithivMLmods/Context-Based-Chat-Summary-Base"
     padding_side = "right"
 
-    train_dataset = load_dataset(dataset_name, split="train[0:800]", cache_dir="/scratch/a_singh4ee.iitr/hf_cache")
-    eval_dataset = load_dataset(dataset_name, split="train[800:1000]", cache_dir="/scratch/a_singh4ee.iitr/hf_cache")
+    train_dataset = load_dataset(train_dataset_name, split="train[0:500]", cache_dir="/scratch/vidit_a_mfs.iitr/hf_cache")
+    eval_dataset = load_dataset(eval_dataset_name, split="train[0:500]", cache_dir="/scratch/vidit_a_mfs.iitr/hf_cache")
     # generated_train_dataset = train_dataset.map(generate_prompt, remove_columns=list(train_dataset.features))
     # generated_val_dataset = eval_dataset.map(generate_prompt, remove_columns=list(eval_dataset.features))
 
-    tokenizer = AutoTokenizer.from_pretrained("mistralai/Mistral-7B-v0.3", trust_remote_code=True, cache_dir="/scratch/a_singh4ee.iitr/hf_cache")
+    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-3B-Instruct", trust_remote_code=True, cache_dir="/scratch/vidit_a_mfs.iitr/hf_cache")
     tokenizer.padding_side = padding_side
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.add_eos_token = True
-    tokenizer.add_bos_token, tokenizer.add_eos_token
+    # tokenizer.add_bos_token, tokenizer.add_eos_token
 
     train_ratios = []
     eval_ratios = []
     for i, sample in enumerate(train_dataset):
-        if i < 200:
-            true_outs = tokenizer.encode(sample["response"], return_tensors="pt")
-            finetune_probs = torch.load(f"/scratch/a_singh4ee.iitr/finetune-and-attack/probs/finetune/train/{i}.pt")
-            base_probs = torch.load(f"/scratch/a_singh4ee.iitr/finetune-and-attack/probs/base/train/{i}.pt")
+        if i < 500:
+            true_outs = tokenizer.encode(sample["headlines"], return_tensors="pt")
+            finetune_probs = torch.load(f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/finetune/fullbits/train/{i}.pt")
+            base_probs = torch.load(f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/base/fullbits/train/{i}.pt")
             if true_outs.shape[-1] < min(finetune_probs.shape[0], base_probs.shape[0]):
                 finetune_probs = finetune_probs[:true_outs.shape[-1]]
                 base_probs = base_probs[:true_outs.shape[-1]]
@@ -71,12 +72,12 @@ if __name__ == "__main__":
             base_pp = pp2.compute()
             train_ratios.append(base_pp / finetune_pp)
         
-    torch.save(torch.Tensor(train_ratios), "/scratch/a_singh4ee.iitr/finetune-and-attack/ratios/train.pt")
+    torch.save(torch.Tensor(train_ratios), "/scratch/vidit_a_mfs.iitr/finetune-and-attack/ratios/fullbits_train.pt")
 
     for j, sample in enumerate(eval_dataset):
         true_outs = tokenizer.encode(sample["response"], return_tensors="pt")
-        finetune_probs = torch.load(f"/scratch/a_singh4ee.iitr/finetune-and-attack/probs/finetune/eval/{j}.pt")
-        base_probs = torch.load(f"/scratch/a_singh4ee.iitr/finetune-and-attack/probs/base/eval/{j}.pt")
+        finetune_probs = torch.load(f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/finetune/fullbits/eval/{j}.pt")
+        base_probs = torch.load(f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/base/fullbits/eval/{j}.pt")
         if len(base_probs.shape) == 1:
             base_probs = base_probs.unsqueeze(0)
         if true_outs.shape[-1] < min(finetune_probs.shape[0], base_probs.shape[0]):
@@ -94,7 +95,7 @@ if __name__ == "__main__":
         base_pp = pp4.compute()
         eval_ratios.append(base_pp / finetune_pp)
         
-    torch.save(torch.Tensor(eval_ratios), "/scratch/a_singh4ee.iitr/finetune-and-attack/ratios/eval.pt")
+    torch.save(torch.Tensor(eval_ratios), "/scratch/vidit_a_mfs.iitr/finetune-and-attack/ratios/fullbits_eval.pt")
     
     pred_list_1 = []
     pred_list_1.extend(eval_ratios[:150])

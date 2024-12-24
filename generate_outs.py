@@ -114,4 +114,5 @@ if __name__ == "__main__":
             probs = torch.stack(output_dict['scores'], dim = 0).squeeze()
             torch.save(probs.cpu(), f"/scratch/vidit_a_mfs.iitr/finetune-and-attack/probs/base/fullbits/eval/{k}.pt")
             del probs, output_dict, input_tokens
+
             torch.cuda.empty_cache()

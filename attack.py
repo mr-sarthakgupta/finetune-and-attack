@@ -52,6 +52,7 @@ if __name__ == "__main__":
 
     train_ratios = []
     eval_ratios = []
+    num_fail = 0
     for i, sample in enumerate(train_dataset):
         if i < 500:
             true_outs = tokenizer.encode(sample["headlines"], return_tensors="pt")
@@ -65,12 +66,18 @@ if __name__ == "__main__":
                 finetune_probs = finetune_probs[:true_outs.shape[-1]]
                 base_probs = base_probs[:true_outs.shape[-1]]
             pp1 = Perplexity()
-            pp1.update(finetune_probs.unsqueeze(0), true_outs)
-            finetune_pp = pp1.compute()
-            pp2 = Perplexity()
-            pp2.update(base_probs.unsqueeze(0), true_outs)
-            base_pp = pp2.compute()
-            train_ratios.append(base_pp / finetune_pp)
+            try:
+                pp1.update(finetune_probs.unsqueeze(0), true_outs)
+                finetune_pp = pp1.compute()
+                pp2 = Perplexity()
+                pp2.update(base_probs.unsqueeze(0), true_outs)
+                base_pp = pp2.compute()
+                train_ratios.append(base_pp / finetune_pp)
+            except:
+                num_fail += 1
+                print(f"Failed for {i}")
+                continue
+    print(f"Failed for {num_fail} samples")
         
     torch.save(torch.Tensor(train_ratios), "/scratch/vidit_a_mfs.iitr/finetune-and-attack/ratios/fullbits_train.pt")
 
@@ -88,12 +95,18 @@ if __name__ == "__main__":
             finetune_probs = finetune_probs[:true_outs.shape[-1]]
             base_probs = base_probs[:true_outs.shape[-1]]
         pp3 = Perplexity()
-        pp3.update(finetune_probs.unsqueeze(0), true_outs)
-        finetune_pp = pp3.compute()
-        pp4 = Perplexity()
-        pp4.update(base_probs.unsqueeze(0), true_outs)
-        base_pp = pp4.compute()
-        eval_ratios.append(base_pp / finetune_pp)
+        try:
+            pp3.update(finetune_probs.unsqueeze(0), true_outs)
+            finetune_pp = pp3.compute()
+            pp4 = Perplexity()
+            pp4.update(base_probs.unsqueeze(0), true_outs)
+            base_pp = pp4.compute()
+            eval_ratios.append(base_pp / finetune_pp)
+        except:
+            num_fail += 1
+            print(f"Failed for {j}")
+            continue
+    print(f"Failed for {num_fail} samples")
         
     torch.save(torch.Tensor(eval_ratios), "/scratch/vidit_a_mfs.iitr/finetune-and-attack/ratios/fullbits_eval.pt")
     
@@ -108,12 +121,16 @@ if __name__ == "__main__":
     print(f"Best threshold: {best_thres}, best accuracy: {best_acc}")
 
     pred_list_2 = []
-    pred_list_2.extend(eval_ratios[150:])
-    pred_list_2.extend(train_ratios[150:])
+    pred_list_2.extend(eval_ratios[150:200])
+    pred_list_2.extend(train_ratios[150:200])
     true_list_2 = []
     true_list_2.extend([0] * 50)
     true_list_2.extend([1] * 50)
+
+    print(np.array(true_list_2).shape, np.array(pred_list_2).shape, best_thres)
+
     r_acc, f_acc, acc = calculate_acc(np.array(true_list_2), np.array(pred_list_2), best_thres)
     print(f"Real accuracy: {r_acc}, Fake accuracy: {f_acc}, Total accuracy: {acc}")
 
     ap = average_precision_score(np.array(true_list_2), np.array(pred_list_2))
+    print(f"Average precision: {ap}")

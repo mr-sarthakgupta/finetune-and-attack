@@ -1,7 +1,2 @@
-wandb/
-results_3_epochs_high_lr/
-results/
 ratios/
 probs/
-mistral-7b-dolly/
-mistral-7b-dolly-1-epoch/
